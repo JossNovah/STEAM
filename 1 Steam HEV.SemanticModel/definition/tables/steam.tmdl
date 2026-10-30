@@ -1,0 +1,172 @@
+table steam
+	lineageTag: f8900adc-45cb-4c20-b771-e335f582ac14
+
+	measure 'Unidades Vendidas' = CALCULATE(COUNTROWS(steam), steam[behavior] = "Purchase")
+		formatString: 0
+		lineageTag: 41132ce2-3cb3-410f-b7af-51fa8f22f3e5
+
+	measure 'Usuarios Únicos' = DISTINCTCOUNT(steam[user_id])
+		formatString: 0
+		lineageTag: ac5876aa-e13b-4094-b939-c3ce5558c9d8
+
+	measure 'Catálogo de Juegos' = DISTINCTCOUNT(steam[game_name])
+		formatString: 0
+		lineageTag: 7eec8eb5-1f2a-4b46-a550-98390f0870e2
+
+	measure 'Horas Totales' = CALCULATE(SUM(steam[value]), steam[behavior] = "Play")
+		lineageTag: 126167e7-4d70-4e98-bb7b-bd64181baa50
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Juegos por Usuario' = DIVIDE([Unidades Vendidas], [Usuarios Únicos])
+		lineageTag: a3667f36-c1cc-40cd-9cfc-f8fbcfcfb014
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Horas Prom. por Usuario' = DIVIDE([Horas Totales], [Usuarios Únicos])
+		lineageTag: b7bb378f-96d3-4ec6-af71-ec64bb7b332b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Tasa de Engagement' = DIVIDE(CALCULATE(DISTINCTCOUNT(steam[user_id]), steam[behavior] = "Play"), [Usuarios Únicos])
+		lineageTag: 221e1f59-bb3e-49ed-a184-83e94e901b0e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Índice de Popularidad' = RANKX(ALL(steam[game_name]), [Unidades Vendidas], , DESC)
+		formatString: 0
+		lineageTag: 476bd078-fcfc-4ab9-9ae7-b20efbcda8f6
+
+	measure '% Top 20 Juegos' = DIVIDE(CALCULATE([Unidades Vendidas], TOPN(20, VALUES(steam[game_name]), [Unidades Vendidas])), [Unidades Vendidas])
+		lineageTag: 0dd9c569-ebf5-4bd0-8ee8-ad7f1f984686
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Promedio Horas' = CALCULATE(AVERAGE(steam[value]), steam[behavior] = "Play")
+		lineageTag: 8929aa75-e9b4-4a30-9320-a8430a7d68cd
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Mediana Horas' = CALCULATE(MEDIAN(steam[value]), steam[behavior] = "Play")
+		lineageTag: cc54600a-2782-4d2b-b1c2-d69e014d0d49
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Máximo Horas' = CALCULATE(MAX(steam[value]), steam[behavior] = "Play")
+		lineageTag: 2daddcbc-c45a-464c-808d-0e9b99064b07
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Desviación Est.' = CALCULATE(STDEV.P(steam[value]), steam[behavior] = "Play")
+		lineageTag: 1eeb2a81-91f8-4886-9dab-10720d5eb566
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Jugadores por Juego' = CALCULATE(DISTINCTCOUNT(steam[user_id]), steam[behavior] = "Play")
+		formatString: 0
+		lineageTag: 9e7858fd-efa8-4476-8640-c33229090ac2
+
+	measure '% Casuales' = DIVIDE(CALCULATE([Usuarios Únicos], steam[SegmentoHoras] = "Menos de 1 h"), [Usuarios Únicos])
+		lineageTag: 1cff69e3-4526-4608-a8e8-cf3da3062230
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column user_id
+		dataType: int64
+		formatString: 0
+		lineageTag: bcdc8d54-3cfb-43c7-9ce5-3eb5532eb442
+		summarizeBy: sum
+		sourceColumn: user_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column game_name
+		dataType: string
+		lineageTag: 4a8c2bed-9561-498a-a8fe-4e43a64ee78b
+		summarizeBy: none
+		sourceColumn: game_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column behavior
+		dataType: string
+		lineageTag: e087fb56-a419-4c1c-a13b-40777795e156
+		summarizeBy: none
+		sourceColumn: behavior
+
+		annotation SummarizationSetBy = Automatic
+
+	column value
+		dataType: double
+		lineageTag: 6840da92-e84c-460f-a5e0-f957c8f40d8b
+		summarizeBy: sum
+		sourceColumn: value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column HorasJugadas
+		dataType: double
+		lineageTag: e76d4e73-23e5-40b1-b9cc-28c71d14afcb
+		summarizeBy: sum
+		sourceColumn: HorasJugadas
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column EsCompra
+		dataType: int64
+		formatString: 0
+		lineageTag: a0e994b4-9329-4589-9452-54a4738b3161
+		summarizeBy: sum
+		sourceColumn: EsCompra
+
+		annotation SummarizationSetBy = Automatic
+
+	column SegmentoHoras
+		dataType: string
+		lineageTag: 21645945-f1cd-4ea7-ab2f-8ea4e9a0bcdc
+		summarizeBy: none
+		sourceColumn: SegmentoHoras
+
+		annotation SummarizationSetBy = Automatic
+
+	partition steam = m
+		mode: import
+		source =
+				let
+				    Ruta = "C:\Users\Hp\Downloads\steam-200k.csv",
+				    Origen = Csv.Document(File.Contents(Ruta),
+				        [Delimiter=",", Columns=5, Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+				    Renombrar = Table.RenameColumns(Encabezados,
+				        {{"151603712","user_id"},{"The Elder Scrolls V Skyrim","game_name"},
+				         {"purchase","behavior"},{"1.0","value"},{"0","col_extra"}}),
+				    QuitarExtra = Table.RemoveColumns(Renombrar,{"col_extra"}),
+				    Tipos = Table.TransformColumnTypes(QuitarExtra,
+				        {{"user_id", Int64.Type},{"game_name", type text},
+				         {"behavior", type text},{"value", type number}}),
+				    LimpiarTexto = Table.TransformColumns(Tipos,
+				        {{"game_name", Text.Trim}, {"behavior", Text.Proper}}),
+				    SinNulos = Table.SelectRows(LimpiarTexto,
+				        each [user_id] <> null and [game_name] <> null and [behavior] <> null),
+				    Horas = Table.AddColumn(SinNulos, "HorasJugadas",
+				        each if [behavior] = "Play" then [value] else null, type number),
+				    EsCompra = Table.AddColumn(Horas, "EsCompra",
+				        each if [behavior] = "Purchase" then 1 else 0, Int64.Type),
+				    Segmento = Table.AddColumn(EsCompra, "SegmentoHoras",
+				        each if [HorasJugadas] = null then "No aplica"
+				             else if [HorasJugadas] < 1 then "Menos de 1 h"
+				             else if [HorasJugadas] < 10 then "1 a 10 h"
+				             else if [HorasJugadas] < 50 then "10 a 50 h"
+				             else if [HorasJugadas] < 100 then "50 a 100 h"
+				             else "Más de 100 h", type text)
+				in
+				    Segmento
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,8 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "a81bb2306563a8b1a8e3",
+  "displayName": "Visuales Dashboard 1 (Gerentes, azul)",
+  "displayOption": "FitToPage",
+  "height": 720,
+  "width": 1280
+}
